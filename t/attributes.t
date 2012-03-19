@@ -10,6 +10,7 @@ use Try::Tiny;
 
   use Moose;
   use MooseX::UndefTolerant;
+  use Try::Tiny;
 
   our $error = 0;
 
@@ -38,10 +39,14 @@ use Try::Tiny;
           ? $tc->coerce($args->{$init_arg})
           : $args->{$init_arg};
 
-      unless ($attr->verify_against_type_constraint($value)) {
-        $error = 2;
-        next;
+      my $exception;
+      try {
+        $attr->verify_against_type_constraint($value);
       }
+      catch {
+        $error = 2;
+      };
+
     }
 
     return $args;
