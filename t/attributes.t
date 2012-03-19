@@ -17,10 +17,6 @@ use Test::More tests => 2;
 
     my $args = $self->$orig(@args);
 
-    # my $error = $new_error->(Constructor => {
-    #   caller => [ caller(3) ],
-    # });
-
     my $meta = Moose::Util::find_meta($self);
     for my $attr (sort { $a->insertion_order <=> $b->insertion_order } $meta->get_all_attributes) {
       next unless defined( my $init_arg = $attr->init_arg );
@@ -31,7 +27,6 @@ use Test::More tests => 2;
         ! $attr->has_builder and
         ! exists $args->{$init_arg}) {
         $error = 1;
-        # $error->add_error($new_error->(Required => { attribute => $attr }));
         next;
       }
 
@@ -42,19 +37,11 @@ use Test::More tests => 2;
           ? $tc->coerce($args->{$init_arg})
           : $args->{$init_arg};
 
-      unless ($tc->check($value)) {
-        $error = 1;
-        # $error->add_error($new_error->(TypeConstraint => {
-        #   attribute => $attr,
-        #   data      => $value,
-        # }));
+      unless ($attr->verify_against_type_constraint($value)) {
+        $error = 2;
         next;
       }
     }
-
-    # if ($error->has_errors) {
-    #   $meta->throw_error($error, params => $args);
-    # }
 
     return $args;
   };
