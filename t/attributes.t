@@ -2,7 +2,8 @@
 
 use v5.12;
 
-use Test::More tests => 2;
+use Test::More tests => 11;
+use Try::Tiny;
 
 {
   package Foo;
@@ -55,6 +56,7 @@ use Test::More tests => 2;
   has baz => (
     is  => 'ro',
     isa => 'Int',
+    predicate => 'has_baz',
   );
 
   has error => (
@@ -68,9 +70,25 @@ use Test::More tests => 2;
 
 my $foo = Foo->new({ bar => 1});
 ok($foo,'object created');
-is($Foo::error,0,'no errors during instantiation');
+is($Foo::error,0,'no errors during normal instantiation');
 
 $foo = Foo->new({ bar => 1, baz => undef});
 ok($foo,'object with undef attribute created');
-is($Foo::error,0,'no errors during instantiation');
+is($Foo::error,0,'no errors during instantiation with undef attribute');
+is($foo->baz,undef,'baz is not set');
+is($foo->has_baz,'','has_baz is not set');
 
+$foo = Foo->new({ bar => 1, baz =>  1 });
+ok($foo,'object with correct type attribute created');
+is($Foo::error,0,'no errors during instantiation');
+ok($foo->baz,'baz is set');
+ok($foo->has_baz,'has_baz is set');
+
+my $exception;
+try {
+  $foo = Foo->new({ bar => 1, baz => 'one' });
+}
+catch {
+  $exception = $_;
+};
+ok($exception,'exception received during instantiation');
