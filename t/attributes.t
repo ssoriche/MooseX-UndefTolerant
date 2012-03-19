@@ -2,7 +2,7 @@
 
 use v5.12;
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Try::Tiny;
 
 {
@@ -97,3 +97,4 @@ catch {
   $exception = $_;
 };
 ok($exception,'exception received during instantiation');
+is($Foo::error,2,'error during instantiation invalid attribute');
