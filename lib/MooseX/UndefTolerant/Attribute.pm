@@ -24,6 +24,16 @@ around('initialize_instance_slot', sub {
     $self->$orig(@_)
 });
 
+around('verify_against_type_constraint', sub {
+    my $orig = shift;
+    my $self = shift;
+    my ($args) = @_;
+
+    return 1 unless ($args);
+
+    $self->$orig($args);
+});
+
 1;
 
 # ABSTRACT: Make your attribute(s) tolerant to undef intitialization
